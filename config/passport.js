@@ -43,7 +43,7 @@ module.exports = function(passport) {
     profileFields: ['id', 'displayName', 'email', 'first_name', 'last_name', 'profileUrl'],
   },  function(access_token, refresh_token, profile, done) {
     process.nextTick(function() {
-      User.findOne({id: profile.name.givenName }, function(err, user) {
+      User.findOne({id: profile.name.givenName}, function(err, user) {
         if (err) {
           return done(err);
         }
@@ -52,7 +52,6 @@ module.exports = function(passport) {
         } else {
           var newUser = new User();
           newUser.id = profile.name.givenName;
-          newUser.password = "test";
           newUser.email = profile.emails[0].value;
           newUser.firstName  = profile.name.givenName;
           newUser.lastName = profile.name.familyName;

@@ -69,7 +69,7 @@ app.get('/users', users.getUsers);
 app.get('/users/:userId', users.getUserByUserId);
 app.post('/users', users.postUser);
 app.put('/users/:userId', auth.isAuthenticated, users.putUserId);
-app.delete('/users/:userId', users.deleteByUserId);
+app.delete('/users/:userId', auth.isAuthenticated, auth.isCurrentUser, users.deleteByUserId);
 
 app.post('/login', users.login);
 app.get('/auth/facebook', passport.authenticate('facebook', {scope: 'public_profile' }));

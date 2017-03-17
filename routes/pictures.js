@@ -39,16 +39,13 @@ exports.postPictures = function(req, res) {
     fs.mkdir('routes/uploads/' + req.params.userId);
   }
   var form = new formidable.IncomingForm();
-  form.multiples = false;
-  form.uploadDir = path.join(__dirname, '/uploads/' + req.params.userId);
-  form.on('file', function(field, file) {
-    fs.rename(file.path, path.join(form.uploadDir, file.name));
+  form.parse(req);
+  form.on('fileBegin', function (name, file) {
+    file.path = __dirname + '/uploads/' + req.params.userId + '/' + file.name;
   });
-  form.on('error', function(err) {
-    console.log('An error has occured: \n' + err);
-    res.send(403);
-  });
-  form.on('end', function() {
+  form.on('file', function (name, file) {
+    console.log(file.name);
+    var url = __dirname + '/uploads/' + req.params.userId + '/' + file.name;
     var description = "";
     var mentions = ""
     var tags = new Array;
@@ -61,16 +58,16 @@ exports.postPictures = function(req, res) {
       description: description,
       mentions: mentions,
       tags: tags,
-      url: form.uploadDir,
+      url: url,
       userId: req.user.id
     });
     newPicture.save();
+    console.log(newPicture);
   });
-  form.parse(req);
-  res.send(200);
+  return res.status(201).send({
+    message: 'Picture updated'
+  });
 };
-
-
 
 /*
 * /get /users/:userId/pictures
@@ -121,10 +118,10 @@ exports.putPicturebyPictureId = function(req, res) {
     });
   }
   console.log(req.params.pictureId);
-  User.findOne({url: req.params.pictureId}, function (err, picture) {
+  Picture.findOne({id: req.params.pictureId}, function (err, picture) {
     if (!picture) {
       return res.status(403).send({
-        message: 'Picture ' + req.params.userId + ' does not exist.'
+        message: 'Picture ' + req.params.pictureId + ' does not exist.'
       });
     }
     picture.description = req.body.description;
