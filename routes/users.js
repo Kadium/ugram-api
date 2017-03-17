@@ -155,7 +155,7 @@ exports.login = function(req, res) {
 */
 
 exports.deleteByUserId = function(req, res) {
-  User.findOneAndRemove({'lastName': req.params.userId}, function (err, picture) {
+  User.findOneAndRemove({'id': req.params.userId}, function (err, picture) {
     if (err) {
       console.log(err);
       return res.status(403).send({
