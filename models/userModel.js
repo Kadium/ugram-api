@@ -4,19 +4,19 @@ var bcrypt = require('bcrypt');
 var modelHelpers = require('./modelHelpers.js');
 
 var UserSchema = new Schema({
-  id: {type: String, required: true},
-  password: {type: String, required: true},
-  email: {type: String, required: true},
-  firstName: {type: String, required: true},
-  lastName: {type: String, required: true},
-  phoneNumber: {type: Number, required: true},
+  id: {type: String, required: false},
+  password: {type: String, required: false},
+  email: {type: String, required: false},
+  firstName: {type: String, required: false},
+  lastName: {type: String, required: false},
+  phoneNumber: {type: Number, required: false},
   pictureUrl: {type: String},
-  registrationDate: {type: Date, required: true}
+  registrationDate: {type: Date, required: false}
 }, {
   versionKey: false
 });
 
-UserSchema.methods.toDTO = function(pictureUrl) {
+UserSchema.methods.toDTO = function() {
   var obj = this.toJSON();
   var dto = {
     id: obj.id.toString(),
@@ -25,11 +25,9 @@ UserSchema.methods.toDTO = function(pictureUrl) {
     lastName: obj.lastName,
     firstName: obj.firstName,
     phoneNumber: obj.phoneNumber,
-    registrationDate: obj.registrationDate
+    registrationDate: obj.registrationDate,
+    pictureUrl: obj.pictureUrl
   };
-  if (pictureUrl) {
-    dto.pictureUrl = obj.pictureUrl;
-  }
   return dto;
 };
 

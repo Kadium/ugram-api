@@ -55,10 +55,8 @@ exports.postPictures = function(req, res) {
     if (req.body.description) {description = req.body.description;}
     if (req.body.mentions) {mentions = req.body.mentions;}
     if (req.body.tags) {tags = req.body.tags;}
-    console.log(req.body.tags);
-    // console.log(req.user);
     var newPicture = new Picture({
-      id: "test",
+      id: 1,
       createdDate: Date.now(),
       description: description,
       mentions: mentions,

@@ -87,27 +87,6 @@ exports.postUser = function (req, res) {
 * /put /users/:userId
 */
 
-CryptPassword = function (id, user, password) {
-  bcrypt.genSalt(10, function (err, salt) {
-    if (err) {
-      return err;
-    }
-    bcrypt.hash(password, salt, function (err, hash) {
-      if (err) {
-        return err;
-      }
-      user.password = hash;
-      console.log("user.password : " + user.password);
-      User.updateUser(id, user, {}, function (err, user) {
-        if (err) {
-          throw err;
-        }
-      });
-    });
-  });
-  return 0;
-};
-
 exports.putUserId = function(req, res) {
   if (!req.params.userId) {
     return res.status(400).send({
@@ -176,7 +155,7 @@ exports.login = function(req, res) {
 */
 
 exports.deleteByUserId = function(req, res) {
-  User.findOneAndRemove({'id': req.params.userId}, function (err, picture) {
+  User.findOneAndRemove({'lastName': req.params.userId}, function (err, picture) {
     if (err) {
       console.log(err);
       return res.status(403).send({
