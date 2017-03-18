@@ -1,11 +1,7 @@
 {
   "name": "ugram-api",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
-  "keywords": [
-    "authentication",
-    "jwt"
-  ],
   "dependencies": {
     "async": "^2.1.5",
     "aws-sdk": "^2.28.0",

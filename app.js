@@ -21,13 +21,18 @@ var search      = require('./routes/search');
 
 var session     = require('express-session');
 
-var AWS          = require('aws-sdk');
+var path        = require('path');
+var http        = require('http');
+var fs          = require('fs');
+var html        = fs.readFileSync('index.html');
+
+//var AWS          = require('aws-sdk');
 //Create an S3 client
 //var s3 = new AWS.S3();
-AWS.config.update({
-  region: "us-west-2",
-  endpoint: "http://localhost:5000"
-});
+// AWS.config.update({
+//   region: "us-west-2",
+//   endpoint: "http://localhost:5000"
+// });
 
 require('./config/passport')(passport);
 
@@ -61,6 +66,36 @@ app.use(morgan('dev'));
 
 app.use(passport.initialize());
 
+
+
+var storage =   multer.diskStorage({
+  destination: function (req, file, callback) {
+    callback(null, './uploads');
+  },
+  filename: function (req, file, callback) {
+    callback(null, file.fieldname + '-' + Date.now());
+  }
+});
+var upload = multer({ storage : storage}).single('userPhoto');
+
+// app.get('/',function(req,res){
+//       res.sendFile(__dirname + "/index.html");
+// });
+
+app.post('/api/photo',function(req,res){
+    upload(req,res,function(err) {
+        if(err) {
+            return res.end("Error uploading file.");
+        }
+        res.end("File is uploaded");
+    });
+});
+
+app.get('/uploads/:pictureId', function(req, res) {
+  fs.createReadStream(path.join('./uploads/', req.params.pictureId)).pipe(res)
+});
+
+
 app.get('/', function(req, res) {
   res.send('Welcome to Ugram API');
 });
@@ -84,6 +119,7 @@ app.post('/users/:userId/pictures', auth.isAuthenticated, auth.isCurrentUser, pi
 app.get('/users/:userId/pictures', pictures.getPicturesByUserId);
 app.delete('/users/:userId/pictures/:pictureId', auth.isAuthenticated, auth.isCurrentUser, pictures.deletePicture);
 app.put('/users/:userId/pictures/:pictureId', auth.isAuthenticated, auth.isCurrentUser, pictures.putPicturebyPictureId)
+app.get('uploads/:pictureId', pictures.getUploads);
 
 app.get('/search/users', search.searchUser);
 app.get('/search/tags', search.searchTags);

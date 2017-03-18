@@ -5,6 +5,7 @@ var bcrypt  = require('bcrypt');
 var path    = require('path');
 var formidable = require('formidable');
 var fs      = require('fs');
+var multer  = require('multer');
 
 var config  = require('../config/database');
 
@@ -31,29 +32,85 @@ exports.getPictures = function (req, res) {
 };
 
 /*
+* /get /uploads/:pictureId
+*/
+
+exports.getUploads = function(req, res) {
+  fs.createReadStream(path.join('./uploads/', req.params.pictureId)).pipe(res);
+};
+
+/*
 * /post /users/:userId/pictures
 */
 
+getRandomIntInclusive = function() {
+  return Math.floor(Math.random() * (10000 - 1 + 1)) + 1;
+}
+
+var storage = multer.diskStorage({
+  destination: function (req, file, callback) {
+    callback(null, './uploads');
+  },
+  filename: function (req, file, callback) {
+    var newId = (getRandomIntInclusive()).toString();
+    var url = 'http://localhost:5000/uploads/' + newId;
+    var description = "";
+    var mentions = "";
+    var tags = new Array;
+    console.log("ici");
+    if (req.body.description) {description = req.body.description;}
+    if (req.body.mentions) {mentions = req.body.mentions;}
+    if (req.body.tags) {tags = req.body.tags;}
+    console.log("ici");
+    var newPicture = new Picture({
+      id: newId,
+      createdDate: Date.now(),
+      description: description,
+      mentions: mentions,
+      tags: tags,
+      url: url,
+      userId: req.user.id
+    });
+    console.log(newPicture);
+    newPicture.save();
+    callback(null, newId);
+  }
+});
+
+var upload = multer({storage : storage}).single('file');
+
 exports.postPictures = function(req, res) {
-  if (!(fs.existsSync('routes/uploads/' + req.params.userId))) {
-    fs.mkdir('routes/uploads/' + req.params.userId);
+  upload(req,res,function(err) {
+    if(err) {
+      return res.status(201).send({
+        message: 'Error uploading file'
+      });
+    }
+    res.end("File is uploaded");
+  });
+};
+
+exports.postPicturesTmp = function(req, res) {
+  if (!(fs.existsSync('http://localhost:5000/uploads/' + req.params.userId))) {
+    fs.mkdir('http://localhost:5000/uploads/' + req.params.userId);
   }
   var form = new formidable.IncomingForm();
   form.parse(req);
   form.on('fileBegin', function (name, file) {
-    file.path = __dirname + '/uploads/' + req.params.userId + '/' + file.name;
+    file.path = 'http://localhost:5000/uploads/' + req.params.userId + '/' + file.name;
   });
   form.on('file', function (name, file) {
     console.log(file.name);
-    var url = __dirname + '/uploads/' + req.params.userId + '/' + file.name;
+    var url = 'http://localhost:5000/uploads/' + req.params.userId + '/' + file.name;
     var description = "";
-    var mentions = ""
+    var mentions = "";
+    var newId = getRandomIntInclusive();
     var tags = new Array;
     if (req.body.description) {description = req.body.description;}
     if (req.body.mentions) {mentions = req.body.mentions;}
     if (req.body.tags) {tags = req.body.tags;}
     var newPicture = new Picture({
-      id: 1,
+      id: newId,
       createdDate: Date.now(),
       description: description,
       mentions: mentions,
@@ -68,6 +125,7 @@ exports.postPictures = function(req, res) {
     message: 'Picture updated'
   });
 };
+
 
 /*
 * /get /users/:userId/pictures
@@ -105,7 +163,6 @@ exports.deletePicture = function(req, res) {
     }
   });
 };
-
 
 /*
 * /put /users/:userId/pictures/:pictureId
