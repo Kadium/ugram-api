@@ -53,15 +53,13 @@ var storage = multer.diskStorage({
   },
   filename: function (req, file, callback) {
     var newId = (getRandomIntInclusive()).toString();
-    var url = 'http://localhost:5000/uploads/' + newId;
+    var url = 'http://localhost/uploads/' + newId;
     var description = "";
     var mentions = "";
     var tags = new Array;
-    console.log("ici");
     if (req.body.description) {description = req.body.description;}
     if (req.body.mentions) {mentions = req.body.mentions;}
     if (req.body.tags) {tags = req.body.tags;}
-    console.log("ici");
     var newPicture = new Picture({
       id: newId,
       createdDate: Date.now(),
@@ -71,7 +69,6 @@ var storage = multer.diskStorage({
       url: url,
       userId: req.user.id
     });
-    console.log(newPicture);
     newPicture.save();
     callback(null, newId);
   }
@@ -89,43 +86,6 @@ exports.postPictures = function(req, res) {
     res.end("File is uploaded");
   });
 };
-
-exports.postPicturesTmp = function(req, res) {
-  if (!(fs.existsSync('http://localhost:5000/uploads/' + req.params.userId))) {
-    fs.mkdir('http://localhost:5000/uploads/' + req.params.userId);
-  }
-  var form = new formidable.IncomingForm();
-  form.parse(req);
-  form.on('fileBegin', function (name, file) {
-    file.path = 'http://localhost:5000/uploads/' + req.params.userId + '/' + file.name;
-  });
-  form.on('file', function (name, file) {
-    console.log(file.name);
-    var url = 'http://localhost:5000/uploads/' + req.params.userId + '/' + file.name;
-    var description = "";
-    var mentions = "";
-    var newId = getRandomIntInclusive();
-    var tags = new Array;
-    if (req.body.description) {description = req.body.description;}
-    if (req.body.mentions) {mentions = req.body.mentions;}
-    if (req.body.tags) {tags = req.body.tags;}
-    var newPicture = new Picture({
-      id: newId,
-      createdDate: Date.now(),
-      description: description,
-      mentions: mentions,
-      tags: tags,
-      url: url,
-      userId: req.user.id
-    });
-    newPicture.save();
-    console.log(newPicture);
-  });
-  return res.status(201).send({
-    message: 'Picture updated'
-  });
-};
-
 
 /*
 * /get /users/:userId/pictures
@@ -147,11 +107,29 @@ exports.getPicturesByUserId = function(req, res) {
 };
 
 /*
+* /get /users/:userId/pictures/:pictureId
+*/
+
+exports.getPicturesByPictureId = function(req, res) {
+  Picture.find({'id': req.params.pictureId}, function (err, docs) {
+    if (!err) {
+      var pictures = [];
+      for (var i = 0; i < docs.length; i++) {
+        pictures.push(docs[i].toDTO());
+      }
+      res.status(200).send(pictures);
+    } else {
+      console.error(err);
+      res.status(500).send(err);
+    }
+  });
+};
+
+/*
 * /delete /users/:userId/pictures/:pictureId
 */
 
 exports.deletePicture = function(req, res) {
-  console.log(req.params.pictureId);
   Picture.findOneAndRemove({'id': req.params.pictureId}, function (err, picture) {
     if (err) {
       console.log(err);
@@ -174,7 +152,6 @@ exports.putPicturebyPictureId = function(req, res) {
       message: 'Editing on forbidden user account for current authentication'
     });
   }
-  console.log(req.params.pictureId);
   Picture.findOne({id: req.params.pictureId}, function (err, picture) {
     if (!picture) {
       return res.status(403).send({

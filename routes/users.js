@@ -73,7 +73,7 @@ exports.postUser = function (req, res) {
       if (err) {
         console.log(err);
         return res.status(403).send({
-          message: 'User already exists'
+          message: 'Can\'t create user'
         });
       }
       return res.status(201).send({

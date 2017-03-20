@@ -1,7 +1,10 @@
-# REST API NodeJS Authentication with token JWT
+# GLO-3112 - Développement avancé d'applications web - API
 
-Nodejs API with JWT Authentication.
 
+GLO-3112 - Développement avancé d'applications web - API - Livrable 2
+
+The API is available at the following address :
+http://sample-env.3vpmbqem2n.us-west-2.elasticbeanstalk.com/
 
 ## Installing
 
@@ -22,151 +25,163 @@ No argument.
 Returns all users in the database.
 
 
+#### GET `/users/:userId`
+
+Returns information of one user.
+
+
 #### POST `/users`
 
 To create a new user.
 
 The body must have :
 
-* `name`: The name
+* `id`: The id
 * `password`: The password
 * `email`: The email
+* `firstName`: The first name
+* `lastName`: The last name
+* `phoneNumber`: The phone number
 
 
-#### GET `/users/self`
-
-Returns information from the current user.
-
-Require authentication and following in header :
-
-```json
-{
-  "Authorization": "Bearer" + {token jwt}
-}
-```
-
-It returns the following :
-
-```json
-{
-  "_id": {id},
-  "name": {name},
-  "password": {encrypted password},
-  "email": {email},
-  "superUser": {superUser},
-}
-```
-
-
-#### GET `/users/:id`
-
-Returns information of one user.
-
-Require authentication and following in header :
-
-```json
-{
-  "Authorization": "Bearer" + {token jwt}
-}
-```
-
-It returns the following :
-
-```json
-{
-  "_id": {id},
-  "name": {name},
-  "password": {encrypted password},
-  "email": {email},
-  "superUser": {superUser},
-}
-```
-
-
-#### PATCH `/users/self`
+#### PUT `/users/:userId`
 
 To update its information.
 
+You can only update your profile.
 Require authentication and following in header :
 
 ```json
 {
-  "Authorization": "Bearer" + {token jwt}
+  "Authorization": "Bearer " + "token"
 }
 ```
 
 The body must have :
 
-* `name`: new name
-* `password`: new password
 * `email`: new email
+* `firstName`: new first name
+* `lastName`: new last name
+* `phoneNumber`: new phone number
 
 
-#### PATCH `/users/:id`
+#### DELETE `/users/:userId`
 
-To update the information of a user.
+To delete user.
 
-Must be super user.
+You can only delete your profile.
 Require authentication and following in header :
 
 ```json
 {
-  "Authorization": "Bearer" + {token jwt}
+  "Authorization": "Bearer " + "token jwt"
 }
 ```
 
-The body must have :
-
-* `name`: new name
-* `password`: new password
-* `email`: new email
-
-
-#### POST `/api/login`
+#### POST `/login`
 
 To connect to the application.
 
 The body must have :
 
-* `name`: name
+* `id`: name
 * `password`: password
 
 It returns the following :
 
 ```json
 {
-  "token": "Bearer" + {token jwt}
+  "token": "Bearer " + "token"
 }
 ```
 
+#### GET `/auth/facebook`
 
-#### POST `/api/forgot`
+To connect to the application with a Facebook account.
+If it is the first connection, an account is created with the user's information
 
-To send a link to reset the password.
+
+
+### Picture APIs
+
+
+#### GET `/pictures`
+
+No argument.
+
+Returns all pictures in the database.
+
+#### GET `/pictures/:userId/pictures/`
+
+Returns all pictures of one user.
+
+
+#### GET `/pictures/:userId/pictures/:picturesId`
+
+Returns information of one user's picture.
+
+
+#### POST `/users/:userId/pictures`
+
+To upload a picture.
+
+Require authentication and following in header :
+
+```json
+{
+  "Authorization": "Bearer " + "token"
+}
+```
+
+The body must have :
+* `file`: The picture
+
+The body can have :
+
+* `description`: The description
+* `mentions`: The mentions
+* `tags`: The tags
+
+
+#### PUT `/pictures/:userId/pictures/:picturesId`
+
+To update a picture.
+
+You can only update your pictures.
+Require authentication and following in header :
+
+```json
+{
+  "Authorization": "Bearer " + "token"
+}
+```
 
 The body must have :
 
-* `email`: email
-
-It returns the following :
-
-```json
-{
-  "token": {link}
-}
-```
-
-The link expires after 1 hour.
+* `description`: new description
+* `mentions`: new mentions
+* `tags`: new tags
 
 
-#### GET `/api/reset/:token`
+#### DELETE `/pictures/:userId/pictures/:picturesId`
 
-To reset the password.
+To delete a picture.
 
-It returns the following :
+You can only delete your pictures.
+Require authentication and following in header :
 
 ```json
 {
-  "password": {new password}
+  "Authorization": "Bearer " + "token jwt"
 }
 ```
+
+### Search APIs
+
+#### GET `/search/users?data=userId`
+
+
+#### GET `/search/users?data=description`
+
+
+#### GET `/search/users?data=tags`

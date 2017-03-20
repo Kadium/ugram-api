@@ -9,7 +9,7 @@ var UserSchema = new Schema({
   email: {type: String, required: true},
   firstName: {type: String, required: true},
   lastName: {type: String, required: true},
-  phoneNumber: {type: Number, required: true},
+  phoneNumber: {type: String, required: true},
   pictureUrl: {type: String},
   registrationDate: {type: Date, required: false}
 }, {

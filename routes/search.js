@@ -2,7 +2,7 @@ var User    = require('../models/userModel');
 var Picture = require('../models/pictureModel');
 
 exports.searchUser = function(req, res) {
-  Picture.find({userId: req.query.userId}, function (err, docs) {
+  User.find({'id': req.query.data}, function (err, docs) {
     if (!err) {
       var users = [];
       for (var i = 0; i < docs.length; i++) {
@@ -17,7 +17,7 @@ exports.searchUser = function(req, res) {
 };
 
 exports.searchTags = function(req, res) {
-  Picture.find({tags: req.query.tags}, function (err, docs) {
+  Picture.find({'tags': req.query.data}, function (err, docs) {
     if (!err) {
       var pictures = [];
       for (var i = 0; i < docs.length; i++) {
@@ -32,7 +32,7 @@ exports.searchTags = function(req, res) {
 };
 
 exports.searchDescription = function(req, res) {
-  Picture.find({'description': {$regex: ".*" + req.query.description + ".*"}}, function(err, docs) {
+  Picture.find({'description': {$regex: ".*" + req.query.data + ".*"}}, function(err, docs) {
     if (!err) {
       var pictures = [];
       for (var i = 0; i < docs.length; i++) {
