@@ -12,9 +12,8 @@ var UserSchema = new Schema({
   phoneNumber: {type: String, required: true},
   pictureUrl: {type: String},
   registrationDate: {type: Date, required: false}
-}, {
-  versionKey: false
-});
+  }
+);
 
 UserSchema.methods.toDTO = function() {
   var obj = this.toJSON();

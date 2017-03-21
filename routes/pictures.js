@@ -1,16 +1,12 @@
-var async   = require('async');
-var jwt     = require('jwt-simple');
-var crypto  = require('crypto');
-var bcrypt  = require('bcrypt');
-var path    = require('path');
-var formidable = require('formidable');
-var fs      = require('fs');
-var multer  = require('multer');
+var async       = require('async');
+var jwt         = require('jwt-simple');
+var config      = require('../config/database');
+var Picture     = require('../models/pictureModel');
 
-var config  = require('../config/database');
 
-var User    = require('../models/userModel');
-var Picture = require('../models/pictureModel');
+getRandomIntInclusive = function() {
+    return Math.floor(Math.random() * (10000 - 1 + 1)) + 1;
+}
 
 /*
 * /get /pictures
@@ -31,61 +27,42 @@ exports.getPictures = function (req, res) {
   });
 };
 
-/*
-* /get /uploads/:pictureId
-*/
+exports.postPictures = function( req, res, next ) {
+    if (req.file) {
+        var description = "";
+        if (req.body.description !== undefined) {
+          description = req.body.description;
+        }
 
-exports.getUploads = function(req, res) {
-  fs.createReadStream(path.join('./uploads/', req.params.pictureId)).pipe(res);
-};
+        var mentions = [];
+        if (req.body.mentions !== undefined) {
+            mentions = req.body.mentions;
+        }
 
-/*
-* /post /users/:userId/pictures
-*/
+        var tags = [];
+        if (req.body.tags !== undefined) {
+            tags = req.body.tags;
+        }
 
-getRandomIntInclusive = function() {
-  return Math.floor(Math.random() * (10000 - 1 + 1)) + 1;
-}
+        var newPicture = new Picture({
+            createdDate: Date.now(),
+            description: description,
+            mentions: mentions,
+            tags: tags,
+            url: req.file.location,
+            userId: req.params.userId
+        });
+        newPicture.save();
 
-var storage = multer.diskStorage({
-  destination: function (req, file, callback) {
-    callback(null, './uploads');
-  },
-  filename: function (req, file, callback) {
-    var newId = (getRandomIntInclusive()).toString();
-    var url = 'http://localhost/uploads/' + newId;
-    var description = "";
-    var mentions = "";
-    var tags = new Array;
-    if (req.body.description) {description = req.body.description;}
-    if (req.body.mentions) {mentions = req.body.mentions;}
-    if (req.body.tags) {tags = req.body.tags;}
-    var newPicture = new Picture({
-      id: newId,
-      createdDate: Date.now(),
-      description: description,
-      mentions: mentions,
-      tags: tags,
-      url: url,
-      userId: req.user.id
-    });
-    newPicture.save();
-    callback(null, newId);
-  }
-});
-
-var upload = multer({storage : storage}).single('file');
-
-exports.postPictures = function(req, res) {
-  upload(req,res,function(err) {
-    if(err) {
-      return res.status(201).send({
-        message: 'Error uploading file'
-      });
+        res.status(200);
+        res.setHeader('Content-Type', 'application/json');
+        res.send(JSON.stringify({ successMessage: 'Image provided', data: newPicture }));
+    } else {
+        res.status(422);
+        res.setHeader('Content-Type', 'application/json');
+        res.send(JSON.stringify({ errorMessage: 'No image provided' }));
     }
-    res.end("File is uploaded");
-  });
-};
+}
 
 /*
 * /get /users/:userId/pictures
@@ -111,11 +88,11 @@ exports.getPicturesByUserId = function(req, res) {
 */
 
 exports.getPicturesByPictureId = function(req, res) {
-  Picture.find({'id': req.params.pictureId}, function (err, docs) {
+  Picture.find({'_id': req.params.pictureId}, function (err, docs) {
     if (!err) {
-      var pictures = [];
+      var pictures;
       for (var i = 0; i < docs.length; i++) {
-        pictures.push(docs[i].toDTO());
+          pictures = docs[i].toDTO();
       }
       res.status(200).send(pictures);
     } else {
@@ -130,14 +107,14 @@ exports.getPicturesByPictureId = function(req, res) {
 */
 
 exports.deletePicture = function(req, res) {
-  Picture.findOneAndRemove({'id': req.params.pictureId}, function (err, picture) {
+  Picture.findOneAndRemove({'_id': req.params.pictureId}, function (err, picture) {
     if (err) {
       console.log(err);
       return res.status(403).send({
         message: 'Picture not found'
       });
     } else {
-      res.json(picture);
+      res.send(JSON.stringify({message: 'Your picture has been deleted.'}));
     }
   });
 };

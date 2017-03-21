@@ -122,6 +122,46 @@ exports.putUserId = function(req, res) {
   });
 };
 
+exports.postProfilePictures = function( req, res, next ) {
+    if (req.file) {
+
+        if (!req.params.userId) {
+            return res.status(400).send({
+                message: 'Missing parameter'
+            });
+        }
+        if (req.params.userId != req.user.id) {
+            return res.status(403).send({
+                message: 'Editing on forbidden user account for current authentication'
+            });
+        }
+        User.findOne({id: req.params.userId}, function (err, user) {
+            if (!user) {
+                return res.status(403).send({
+                    message: 'User ' + req.params.userId + ' does not exist.'
+                });
+            }
+            user.pictureUrl = req.file.location
+            User.updateUser(req.params.userId, user, {}, function (err, user) {
+                if (err) {
+                    return res.status(403).send({
+                        message: 'Can\'t update user'
+                    });
+                } else {
+                    res.status(200);
+                    return res.status(201).send({
+                        message: 'User updated',
+                        data: user
+                    });
+                }
+            });
+        });
+    } else {
+        res.status(422);
+        res.setHeader('Content-Type', 'application/json');
+        res.send(JSON.stringify({ errorMessage: 'No image provided' }));
+    }
+}
 /*
 * /post /login
 */

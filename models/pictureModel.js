@@ -5,21 +5,18 @@ var modelHelpers = require('./modelHelpers.js');
 var config      = require('../config/database');
 
 var PictureSchema = new Schema({
-  id: {type: Number},
   createdDate: {type: String, required: true},
   description: {type: String, required: false},
   mentions: {type: String, required: false},
   tags: {type: Array, required: false},
   url: {type: String, required: true},
   userId: {type: String, required: true}
-}, {
-  versionKey: false
 });
 
 PictureSchema.methods.toDTO = function() {
   var obj = this.toJSON();
   var dto = {
-    id: obj.id,
+    id: obj._id,
     createdDate: obj.createdDate,
     description: obj.description,
     mentions: obj.mentions,
@@ -48,7 +45,6 @@ module.exports.getNextSequence = function(oldId) {
   );
   return ret.seq;
 }
-
 
 module.exports.updatePicture = function (_id, picture, options, callback) {
   var query = {_id: picture._id};

@@ -40,7 +40,7 @@ module.exports = function(passport) {
     clientID: configAuth.facebookAuth.clientID,
     clientSecret: configAuth.facebookAuth.clientSecret,
     callbackURL: configAuth.facebookAuth.callbackURL,
-    profileFields: ['id', 'displayName', 'email', 'first_name', 'last_name', 'profileUrl'],
+    profileFields: ['id', 'displayName', 'email', 'first_name', 'last_name', 'picture'],
   },  function(access_token, refresh_token, profile, done) {
     process.nextTick(function() {
       User.findOne({id: profile.name.givenName}, function(err, user) {
