@@ -4,7 +4,7 @@
 GLO-3112 - Développement avancé d'applications web - API - Livrable 2
 
 The API is available at the following address :
-http://sample-env.3vpmbqem2n.us-west-2.elasticbeanstalk.com/
+http://sample-env.ttuhj5f6tu.us-east-1.elasticbeanstalk.com/
 
 ## Installing
 
